@@ -1,0 +1,19 @@
+{
+  "name": "prismatic-refract",
+  "version": "0.1.0",
+  "description": "Refract — DevRel community engagement bot built on Prismatic",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test:scoring": "tsx scripts/test-scoring-flow.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
+  }
+}

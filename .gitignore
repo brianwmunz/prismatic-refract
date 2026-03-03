@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+integration/node_modules/
+
+# Build output
+dist/
+integration/dist/
+
+# Environment variables — never commit secrets
+.env
+.env.*
+!.env.example
+
+# TypeScript build info
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Claude Code local settings
+.claude/
