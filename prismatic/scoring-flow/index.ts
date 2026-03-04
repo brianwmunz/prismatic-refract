@@ -47,6 +47,12 @@ export interface ScoringFlowConfig {
    * if you feel like you're missing things worth seeing.
    */
   minScore?: number;
+  /**
+   * Reddit username to exclude (without the u/ prefix).
+   * Any mention authored by this account is skipped before scoring —
+   * prevents your own posts and comments from burning Claude API calls.
+   */
+  redditUsername?: string;
 }
 
 // Fallback used when minScore is not provided in config
@@ -92,6 +98,23 @@ export async function runScoringFlow(
   }
 
   console.log(`[scoring-flow] Received ${mentions.length} mention(s) to score.`);
+
+  // Step 1b — Filter own account
+  // Skip mentions authored by the configured Reddit username so your own
+  // posts and comments don't get scored or posted to Slack.
+  if (config.redditUsername) {
+    const own = config.redditUsername.toLowerCase();
+    const before = mentions.length;
+    mentions = mentions.filter((m) => m.author.toLowerCase() !== own);
+    const skipped = before - mentions.length;
+    if (skipped > 0) {
+      console.log(`[scoring-flow] Skipped ${skipped} mention(s) from own account (${config.redditUsername}).`);
+    }
+    if (mentions.length === 0) {
+      console.log("[scoring-flow] All mentions were from own account — nothing to score.");
+      return;
+    }
+  }
 
   // Step 2 — Score
   // Call Claude for each mention. scoreMentions() uses Promise.allSettled

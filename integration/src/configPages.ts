@@ -48,6 +48,16 @@ export const configPages = {
           "Default: 5. Raise to reduce noise, lower to see more.",
         defaultValue: "5",
       }),
+
+      "Reddit Username": configVar({
+        stableKey: "reddit-username",
+        dataType: "string",
+        description:
+          "Your Reddit username (without the u/ prefix). " +
+          "Posts and comments from this account will be skipped so your own activity " +
+          "doesn't get scored. Leave blank to disable filtering.",
+        defaultValue: "",
+      }),
     },
   }),
 };

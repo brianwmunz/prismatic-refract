@@ -42,10 +42,11 @@ export const scoringFlow = flow({
 
   onExecution: async (context, params) => {
     const config = {
-      anthropicApiKey: util.types.toString(context.configVars["Anthropic API Key"]),
-      slackBotToken:   util.types.toString(context.configVars["Slack Bot Token"]),
-      slackChannel:    util.types.toString(context.configVars["Slack Channel ID"]),
-      minScore:        Number(context.configVars["Minimum Score"] ?? 5),
+      anthropicApiKey:  util.types.toString(context.configVars["Anthropic API Key"]),
+      slackBotToken:    util.types.toString(context.configVars["Slack Bot Token"]),
+      slackChannel:     util.types.toString(context.configVars["Slack Channel ID"]),
+      minScore:         Number(context.configVars["Minimum Score"] ?? 5),
+      redditUsername:   util.types.toString(context.configVars["Reddit Username"]) || undefined,
     };
 
     // Trigger payload flows from onTrigger into onExecution via params.onTrigger.results
