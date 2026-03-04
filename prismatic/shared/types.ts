@@ -56,6 +56,8 @@ export interface ScoredMention {
 
 // Claude drafting response (Flow 2)
 export interface DraftResult {
+  skip: boolean;         // True if Claude recommends not responding
+  skip_reason: string;   // Populated when skip is true
   draft: string;         // The comment text, ready to copy-paste
   notes: string;         // Claude's reasoning and suggestions for Munz
   reply_target: ReplyTarget;

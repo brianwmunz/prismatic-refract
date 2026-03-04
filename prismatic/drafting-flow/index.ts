@@ -144,7 +144,25 @@ export async function runDraftingFlow(
     return;
   }
 
-  // Step 6 — Post the draft as a thread reply
+  // Step 6 — Post the draft (or skip recommendation) as a thread reply
+  if (draft.skip) {
+    await postThreadReply(
+      config.slackBotToken,
+      config.slackChannel,
+      messageTs,
+      `Refract recommends skipping: ${metadata.post_title}`,
+      [{
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `🚫 *Refract recommends not responding to this one.*\n${draft.skip_reason}`,
+        },
+      }]
+    );
+    console.log(`[drafting-flow] Skip recommended for ts=${messageTs}: ${draft.skip_reason}`);
+    return;
+  }
+
   const replyBlocks = buildDraftBlocks(draft.draft, draft.notes, metadata.post_url, draft.reply_target);
   await postThreadReply(
     config.slackBotToken,

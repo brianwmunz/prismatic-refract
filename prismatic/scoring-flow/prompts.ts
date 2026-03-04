@@ -97,6 +97,13 @@ engagement_score (1–10):
   10 = clear question, active discussion, reply would land well
   1  = no natural opening or nothing useful to add
 
+  Important nuance on promotional posts: if the post exists purely to
+  promote, sell, or advertise — with no genuine question or request for
+  input — score engagement_score low (1–2) regardless of topic relevance.
+  However, if a promotional post also contains a real question or asks
+  for genuine feedback or advice, score it normally based on that ask.
+  The test: is the author seeking input, or only broadcasting?
+
 combined_score:
   The HIGHER of the two scores — this drives Slack priority tier.
 

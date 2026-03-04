@@ -75,6 +75,15 @@ and keep the reasoning brief.
 
 FORMAT OF YOUR RESPONSE:
 
+If you genuinely think Munz should not reply — the post is purely
+promotional with no question, the thread is dead, a reply would seem
+opportunistic or add no value — say so instead of drafting:
+
+SKIP
+REASON: <one sentence explaining why this isn't worth engaging with>
+
+Otherwise, draft a reply:
+
 DRAFT:
 <the comment text — this is what Munz will copy-paste and post>
 

@@ -62,6 +62,19 @@ export async function draftReply(
 function parseDraftResponse(raw: string): DraftResult {
   const text = raw.trim();
 
+  // Check for SKIP recommendation before attempting to parse a draft
+  if (text.toUpperCase().startsWith("SKIP")) {
+    const reasonLine = text.split("\n").find((l) => l.toUpperCase().startsWith("REASON:")) ?? "";
+    const skip_reason = reasonLine.replace(/^REASON:\s*/i, "").trim();
+    return {
+      skip: true,
+      skip_reason,
+      draft: "",
+      notes: "",
+      reply_target: { target: "op", reasoning: "" },
+    };
+  }
+
   // Split on all "---" separators
   const sections = text.split("\n---\n").map((s) => s.trim());
 
@@ -77,7 +90,7 @@ function parseDraftResponse(raw: string): DraftResult {
   const notes = stripLabel(notesSection, "NOTES:");
   const reply_target = parseReplyTarget(targetSection);
 
-  return { draft, notes, reply_target };
+  return { skip: false, skip_reason: "", draft, notes, reply_target };
 }
 
 /**
