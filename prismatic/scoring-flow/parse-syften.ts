@@ -116,7 +116,6 @@ function ensureArray(rawBody: unknown): unknown[] {
 // enforce what our flow actually depends on.
 const REQUIRED_FIELDS = [
   "backend",
-  "backend_sub",
   "type",
   "item_url",
   "author",
@@ -124,6 +123,9 @@ const REQUIRED_FIELDS = [
   "title",
   "timestamp",
 ] as const;
+
+// backend_sub is Reddit-specific (the subreddit). Other platforms like
+// dev.to don't send it, so we make it optional and default to empty string.
 
 type ValidationSuccess = { ok: true; mention: SyftenMention };
 type ValidationFailure = { ok: false; error: string };
@@ -152,11 +154,12 @@ function validateMention(item: unknown): ValidationResult {
     }
   }
 
-  // type must be one of the two known values
-  if (obj["type"] !== "post" && obj["type"] !== "comment") {
+  // type must be one of the known values across supported platforms
+  const KNOWN_TYPES = ["post", "comment", "article"];
+  if (!KNOWN_TYPES.includes(obj["type"] as string)) {
     return {
       ok: false,
-      error: `Unknown mention type: "${obj["type"]}" (expected "post" or "comment")`,
+      error: `Unknown mention type: "${obj["type"]}" (expected one of: ${KNOWN_TYPES.join(", ")})`,
     };
   }
 
@@ -173,8 +176,8 @@ function validateMention(item: unknown): ValidationResult {
     ok: true,
     mention: {
       backend:      obj["backend"] as string,
-      backend_sub:  obj["backend_sub"] as string,
-      type:         obj["type"] as "post" | "comment",
+      backend_sub:  typeof obj["backend_sub"] === "string" ? obj["backend_sub"] : "",
+      type:         obj["type"] as "post" | "comment" | "article",
       icon_url:     typeof obj["icon_url"] === "string" ? obj["icon_url"] : "",
       timestamp:    obj["timestamp"] as string,
       item_url:     obj["item_url"] as string,

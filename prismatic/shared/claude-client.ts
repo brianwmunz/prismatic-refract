@@ -65,9 +65,13 @@ export async function callClaudeForScore(
 ): Promise<ScoringResult> {
   const { text } = await callClaude(client, systemPrompt, userMessage, model);
 
+  // Claude occasionally wraps its JSON response in a markdown code fence
+  // (```json ... ```) even when instructed not to. Strip it before parsing.
+  const json = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(text);
+    parsed = JSON.parse(json);
   } catch {
     const err = new Error("Claude returned non-JSON for scoring");
     (err as Error & { rawResponse: string }).rawResponse = text;

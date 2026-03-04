@@ -2,8 +2,8 @@
 // Syften sends an array — usually one item per call, but handle multiples to be safe.
 export interface SyftenMention {
   backend: string;          // Platform name, e.g. "Reddit", "HackerNews"
-  backend_sub: string;      // Community, e.g. "r/SaaS"
-  type: "post" | "comment";
+  backend_sub: string;      // Community, e.g. "r/SaaS". Empty string for platforms that don't have sub-communities (dev.to).
+  type: "post" | "comment" | "article";
   icon_url: string;         // Platform favicon URL
   timestamp: string;        // ISO 8601, e.g. "2026-03-03T16:53:58Z"
   item_url: string;         // Direct link to the post or comment
