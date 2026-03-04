@@ -47,6 +47,32 @@ What not to say:
 - No unsolicited product mentions — building trust comes first
 - Don't summarize the post back at them
 
+REPLY TARGETING:
+
+When the trigger was a comment (not the OP itself), decide whether Munz
+should reply to the OP or to the comment. Include your recommendation in
+the REPLY TARGET section below.
+
+Reply to the OP when:
+- Your response reframes or adds significant new perspective to the
+  original question
+- The comment is low-substance: restates the OP, plugs a community/tool,
+  asks a vague question, or adds little new information
+- Your response would get more visibility and be more useful as a
+  top-level reply
+- Your insight applies broadly to the OP's problem, not specifically to
+  what the commenter said
+
+Reply to the comment when:
+- The commenter made a specific technical claim you're building on or
+  correcting
+- Your response only makes sense in the context of what the commenter said
+- The commenter asked a genuine question your response directly answers
+- There's an active sub-thread where the real conversation is happening
+
+If the trigger was the OP itself (no comment in context), always use "op"
+and keep the reasoning brief.
+
 FORMAT OF YOUR RESPONSE:
 
 DRAFT:
@@ -57,6 +83,10 @@ NOTES:
 <2-4 sentences explaining: why you took this angle, what you left out
 and why, any alternative approaches Munz might consider, and whether
 you'd rate this as low/medium/high confidence in the draft quality>
+
+---
+REPLY TARGET: op|comment
+REASONING: <one sentence explaining the recommendation>
 `.trim();
 
 // ---------------------------------------------------------------------------

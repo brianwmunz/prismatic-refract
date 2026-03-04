@@ -56,6 +56,12 @@ export interface ScoredMention {
 
 // Claude drafting response (Flow 2)
 export interface DraftResult {
-  draft: string;  // The comment text, ready to copy-paste
-  notes: string;  // Claude's reasoning and suggestions for Munz
+  draft: string;         // The comment text, ready to copy-paste
+  notes: string;         // Claude's reasoning and suggestions for Munz
+  reply_target: ReplyTarget;
+}
+
+export interface ReplyTarget {
+  target: "op" | "comment";
+  reasoning: string;  // One sentence explaining the recommendation
 }

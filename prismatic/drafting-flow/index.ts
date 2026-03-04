@@ -145,7 +145,7 @@ export async function runDraftingFlow(
   }
 
   // Step 6 — Post the draft as a thread reply
-  const replyBlocks = buildDraftBlocks(draft.draft, draft.notes, metadata.post_url);
+  const replyBlocks = buildDraftBlocks(draft.draft, draft.notes, metadata.post_url, draft.reply_target);
   await postThreadReply(
     config.slackBotToken,
     config.slackChannel,
@@ -200,8 +200,15 @@ function extractMetadata(blocks: SlackBlock[]): RefractMetadata | null {
 function buildDraftBlocks(
   draft: string,
   notes: string,
-  postUrl: string
+  postUrl: string,
+  replyTarget: import("../shared/types.js").ReplyTarget
 ): SlackBlock[] {
+  const targetEmoji = replyTarget.target === "op" ? "↩️" : "💬";
+  const targetLabel = replyTarget.target === "op" ? "Reply to *OP*" : "Reply to *comment*";
+  const targetLine = replyTarget.reasoning
+    ? `${targetEmoji} ${targetLabel} — ${replyTarget.reasoning}`
+    : `${targetEmoji} ${targetLabel}`;
+
   return [
     {
       type: "section",
@@ -223,6 +230,15 @@ function buildDraftBlocks(
       },
     },
     { type: "divider" },
+    {
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: targetLine,
+        },
+      ],
+    },
     {
       type: "context",
       elements: [
