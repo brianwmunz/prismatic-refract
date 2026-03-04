@@ -10,7 +10,7 @@
  * https://api.slack.com/reference/block-kit/blocks
  *
  * Three priority tiers based on combined_score:
- *   🔴  High   (>= 7) — full detail, prominent visual weight
+ *   🔥  High   (>= 7) — full detail, prominent visual weight
  *   🟡  Medium (4–6)  — same layout, quieter indicator
  *   ⚪  Low    (<= 3) — condensed single-line entry
  *
@@ -90,7 +90,7 @@ export function formatScoredMention(
 
   const blocks =
     score >= HIGH_SCORE_THRESHOLD
-      ? buildFullBlocks(scored, "🔴")
+      ? buildFullBlocks(scored, "🔥")
       : score > LOW_SCORE_THRESHOLD
         ? buildFullBlocks(scored, "🟡")
         : buildCondensedBlocks(scored);
