@@ -14,7 +14,6 @@
  *   Platform          — rich_text
  *   Community         — rich_text    (subreddit, publication, etc.)
  *   Score             — number
- *   Type              — select       (general | prismatic)
  *   Prismatic Relevance — select  (High (mentioned) | Medium (Adjacent) | Low (Reputation))
  *   Responded At        — date
  */
@@ -33,7 +32,6 @@ export interface NotionEngagementEntry {
   platform:           string;
   platformSub:        string;
   score:              number;
-  engagementType:     "general" | "prismatic";
   prismaticRelevance: PrismaticRelevance;
   respondedAt:        string; // ISO 8601 date string
 }
@@ -83,9 +81,6 @@ export async function createNotionEntry(
       },
       "Score": {
         number: entry.score,
-      },
-      "Type": {
-        select: { name: entry.engagementType },
       },
       "Prismatic Relevance": {
         select: { name: entry.prismaticRelevance },

@@ -95,7 +95,6 @@ export async function runLoggingFlow(
       platform:           metadata.platform,
       platformSub:        metadata.platform_sub,
       score:              metadata.combined_score,
-      engagementType:     metadata.engagement_type,
       prismaticRelevance: derivePrismaticRelevance(metadata.engagement_type, metadata.prismatic_opportunity),
       respondedAt:        new Date().toISOString(),
     });
