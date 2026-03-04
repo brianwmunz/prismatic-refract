@@ -21,6 +21,7 @@
 import { flow, util } from "@prismatic-io/spectral";
 import { runScoringFlow } from "../../prismatic/scoring-flow/index.js";
 import { runDraftingFlow } from "../../prismatic/drafting-flow/index.js";
+import { runLoggingFlow } from "../../prismatic/logging-flow/index.js";
 
 // ---------------------------------------------------------------------------
 // Flow 1: Score Mention
@@ -91,15 +92,23 @@ export const draftingFlow = flow({
   },
 
   onExecution: async (context, params) => {
-    const config = {
-      anthropicApiKey: util.types.toString(context.configVars["Anthropic API Key"]),
-      slackBotToken:   util.types.toString(context.configVars["Slack Bot Token"]),
-      slackChannel:    util.types.toString(context.configVars["Slack Channel ID"]),
-    };
+    const slackBotToken = util.types.toString(context.configVars["Slack Bot Token"]);
+    const slackChannel  = util.types.toString(context.configVars["Slack Channel ID"]);
 
     const event = params.onTrigger.results.body.data as import("../../prismatic/drafting-flow/index.js").SlackReactionEvent;
+    const reaction = event.event?.reaction;
 
-    await runDraftingFlow(event, config);
+    // Route based on which emoji was used:
+    //   👀 (eyes)              → draft a reply
+    //   ✅ (white_check_mark)  → log the engagement to Notion
+    if (reaction === "white_check_mark") {
+      const notionToken      = util.types.toString(context.configVars["Notion Token"]);
+      const notionDatabaseId = util.types.toString(context.configVars["Notion Database ID"]);
+      await runLoggingFlow(event, { notionToken, notionDatabaseId, slackBotToken, slackChannel });
+    } else {
+      const anthropicApiKey = util.types.toString(context.configVars["Anthropic API Key"]);
+      await runDraftingFlow(event, { anthropicApiKey, slackBotToken, slackChannel });
+    }
 
     return { data: "success" };
   },
