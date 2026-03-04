@@ -24,7 +24,7 @@
  */
 
 import { fetchMessage, postThreadReply } from "../shared/slack-client.js";
-import { createNotionEntry } from "../shared/notion-client.js";
+import { createNotionEntry, derivePrismaticRelevance } from "../shared/notion-client.js";
 import type { SlackBlock } from "../scoring-flow/slack-formatter.js";
 import type { RefractMetadata } from "../scoring-flow/slack-formatter.js";
 import type { SlackReactionEvent } from "../drafting-flow/index.js";
@@ -90,14 +90,14 @@ export async function runLoggingFlow(
   // Step 4 — Log to Notion
   try {
     await createNotionEntry(config.notionToken, config.notionDatabaseId, {
-      postTitle:            metadata.post_title,
-      postUrl:              metadata.post_url,
-      platform:             metadata.platform,
-      platformSub:          metadata.platform_sub,
-      score:                metadata.combined_score,
-      engagementType:       metadata.engagement_type,
-      prismaticOpportunity: metadata.prismatic_opportunity,
-      respondedAt:          new Date().toISOString(),
+      postTitle:          metadata.post_title,
+      postUrl:            metadata.post_url,
+      platform:           metadata.platform,
+      platformSub:        metadata.platform_sub,
+      score:              metadata.combined_score,
+      engagementType:     metadata.engagement_type,
+      prismaticRelevance: derivePrismaticRelevance(metadata.engagement_type, metadata.prismatic_opportunity),
+      respondedAt:        new Date().toISOString(),
     });
   } catch (err) {
     console.error("[logging-flow] Failed to create Notion entry:", err);

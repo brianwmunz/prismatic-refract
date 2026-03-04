@@ -15,22 +15,43 @@
  *   Community         — rich_text    (subreddit, publication, etc.)
  *   Score             — number
  *   Type              — select       (general | prismatic)
- *   Prismatic Win     — checkbox
- *   Responded At      — date
+ *   Prismatic Relevance — select  (High (mentioned) | Medium (Adjacent) | Low (Reputation))
+ *   Responded At        — date
  */
 
 const NOTION_API_BASE = "https://api.notion.com/v1";
 const NOTION_VERSION  = "2022-06-28";
 
+export type PrismaticRelevance =
+  | "High (mentioned)"   // Prismatic was named or linked — direct opportunity
+  | "Medium (Adjacent)"  // Topic is in Prismatic's space but not name-dropped
+  | "Low (Reputation)";  // General community engagement, off-topic
+
 export interface NotionEngagementEntry {
-  postTitle:            string;
-  postUrl:              string;
-  platform:             string;
-  platformSub:          string;
-  score:                number;
-  engagementType:       "general" | "prismatic";
-  prismaticOpportunity: boolean;
-  respondedAt:          string; // ISO 8601 date string
+  postTitle:          string;
+  postUrl:            string;
+  platform:           string;
+  platformSub:        string;
+  score:              number;
+  engagementType:     "general" | "prismatic";
+  prismaticRelevance: PrismaticRelevance;
+  respondedAt:        string; // ISO 8601 date string
+}
+
+/**
+ * Derive the Prismatic Relevance tier from scoring fields.
+ *
+ *   prismatic_opportunity = true           → High (mentioned)
+ *   engagement_type = "prismatic"          → Medium (Adjacent)
+ *   engagement_type = "general"            → Low (Reputation)
+ */
+export function derivePrismaticRelevance(
+  engagementType: "general" | "prismatic",
+  prismaticOpportunity: boolean
+): PrismaticRelevance {
+  if (prismaticOpportunity)            return "High (mentioned)";
+  if (engagementType === "prismatic")  return "Medium (Adjacent)";
+  return "Low (Reputation)";
 }
 
 /**
@@ -66,8 +87,8 @@ export async function createNotionEntry(
       "Type": {
         select: { name: entry.engagementType },
       },
-      "Prismatic Win": {
-        checkbox: entry.prismaticOpportunity,
+      "Prismatic Relevance": {
+        select: { name: entry.prismaticRelevance },
       },
       "Responded At": {
         date: { start: entry.respondedAt },
