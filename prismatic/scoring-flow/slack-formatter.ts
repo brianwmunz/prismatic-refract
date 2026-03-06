@@ -66,6 +66,8 @@ export interface RefractMetadata {
   engagement_score: number;
   combined_score: number;
   engagement_type: "general" | "prismatic";
+  prismatic_relevance: "high" | "medium" | "low";
+  authenticity: string;
   reasoning: string;
   prismatic_opportunity: boolean;
   low_hanging_fruit: boolean;
@@ -142,14 +144,15 @@ function buildFullBlocks(scored: ScoredMention, indicator: string): SlackBlock[]
 
     { type: "divider" },
 
-    // --- Scores, type badge, reasoning, angle ---
+    // --- Scores, type badge, authenticity, reasoning, angle ---
     {
       type: "section",
       text: {
         type: "mrkdwn",
         text: [
           `📊 Relevance: ${scoring.relevance_score} | Engagement: ${scoring.engagement_score}`,
-          typeBadge(scoring.engagement_type, scoring.low_hanging_fruit, scoring.prismatic_opportunity),
+          typeBadge(scoring.engagement_type, scoring.prismatic_relevance, scoring.low_hanging_fruit, scoring.prismatic_opportunity),
+          `🔍 *Authenticity:* ${scoring.authenticity}`,
           `🧠 *Reasoning:* ${scoring.reasoning}`,
           `💡 *Angle:* ${scoring.suggested_angle}`,
         ].join("\n"),
@@ -223,6 +226,8 @@ function buildMetadataBlock(scored: ScoredMention): SlackBlock {
     engagement_score:      scoring.engagement_score,
     combined_score:        scoring.combined_score,
     engagement_type:       scoring.engagement_type,
+    prismatic_relevance:   scoring.prismatic_relevance,
+    authenticity:          scoring.authenticity,
     reasoning:             scoring.reasoning,
     prismatic_opportunity: scoring.prismatic_opportunity,
     low_hanging_fruit:     scoring.low_hanging_fruit,
@@ -252,18 +257,25 @@ function buildMetadataBlock(scored: ScoredMention): SlackBlock {
  * This is the clearest signal about what kind of action to take.
  *
  * Examples:
- *   🎯 *Prismatic Opportunity*  🍎 Low Hanging Fruit  🏷️ Point to Prismatic: ✅
+ *   🎯 *Prismatic Opportunity — High*  🍎 Low Hanging Fruit  🏷️ Point to Prismatic: ✅
+ *   🎯 *Prismatic Opportunity — Medium*
  *   💬 *General Engagement*
  */
 function typeBadge(
   type: "general" | "prismatic",
+  prismaticRelevance: "high" | "medium" | "low",
   lowHangingFruit: boolean,
   prismaticOpportunity: boolean
 ): string {
   const parts: string[] = [];
 
   if (type === "prismatic") {
-    parts.push("🎯 *Prismatic Opportunity*");
+    const tierLabel = {
+      high:   "High — Prismatic mentioned",
+      medium: "Medium — Adjacent topic",
+      low:    "Low — Reputation play",
+    }[prismaticRelevance];
+    parts.push(`🎯 *Prismatic Opportunity — ${tierLabel}*`);
     if (lowHangingFruit)      parts.push("🍎 *Low Hanging Fruit*");
     if (prismaticOpportunity) parts.push("🏷️ Point to Prismatic: ✅");
   } else {

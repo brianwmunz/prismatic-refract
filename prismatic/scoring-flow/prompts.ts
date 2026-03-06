@@ -13,6 +13,40 @@
 import type { SyftenMention } from "../shared/types.js";
 
 // ---------------------------------------------------------------------------
+// Subreddit quality tiers
+// ---------------------------------------------------------------------------
+
+/**
+ * Reference table used in the system prompt.
+ * Update this constant as the tracked subreddit list evolves — it's the
+ * only place that needs to change when tiers shift.
+ *
+ * Tiers affect how generously Claude scores borderline posts:
+ *   HIGH   — technical, practitioner-heavy, well-moderated; score liberally
+ *   MEDIUM — good signal, higher volume; standard scoring
+ *   LOW    — heavy AI-generated content; score strictly
+ */
+const SUBREDDIT_TIERS = `
+SUBREDDIT QUALITY TIERS
+────────────────────────────────────────────────────────────────
+HIGH-SIGNAL — technical practitioners, well-moderated, bot-resistant.
+A relevant post here is almost certainly worth engaging with. Score
+borderline posts one point higher than you otherwise would.
+  r/devops, r/sysadmin, r/ExperiencedDevs, r/softwarearchitecture,
+  r/dataengineering
+
+MEDIUM-SIGNAL — good signal, higher volume. Standard scoring.
+  r/webdev, r/programming, r/selfhosted, r/aws, r/googlecloud,
+  r/node, r/typescript
+
+LOW-SIGNAL — heavy AI-generated content and bot responses. Only surface
+posts that score very high on both relevance and authenticity. Score
+borderline posts one point lower than you otherwise would.
+  r/saas
+────────────────────────────────────────────────────────────────
+`.trim();
+
+// ---------------------------------------------------------------------------
 // Model
 // ---------------------------------------------------------------------------
 
@@ -85,17 +119,61 @@ write and likely to be well-received, possibly referencing a Prismatic
 blog post, doc, or case study.
 
 ─────────────────────────────────────────────────────────────
+SUBREDDIT QUALITY TIERS
+─────────────────────────────────────────────────────────────
+${SUBREDDIT_TIERS}
+
+Factor subreddit quality directly into your scores. The same post
+should score differently depending on where it appears:
+- In a HIGH-SIGNAL subreddit, a borderline post scores one point
+  higher — the practitioner audience means it's more likely to be a
+  real person with a real problem.
+- In a LOW-SIGNAL subreddit (especially r/saas), a borderline post
+  scores one point lower unless it clears the AI slop bar below.
+  There is no value in engaging with bots.
+- Posts from subreddits not in any tier above: score normally.
+
+─────────────────────────────────────────────────────────────
+AI SLOP DETECTION
+─────────────────────────────────────────────────────────────
+Before scoring, assess whether the post appears to be AI-generated or
+bot-authored. Signals to look for:
+
+  Structure signals:
+  - Generic numbered lists with bold headers ("Here are 5 reasons…")
+  - "Here's the thing…" / "Let's dive in" / "In today's landscape…"
+  - Posts that read like a blog summary rather than a genuine question
+  - Suspiciously comprehensive answers that cover every angle evenly
+
+  Content signals:
+  - No personal experience, no "I tried X and it failed" markers
+  - Vague pain points stated as universal truths ("Many founders struggle
+    with…") rather than specific situations
+  - Asks for feedback but the post is already fully formed and polished
+  - Promotes a product or service in a way that feels like ad copy
+
+  Author signals:
+  - Username is a jumbled string of words or random alphanumerics
+  - Account is brand-new with no post history
+
+If a post shows multiple of these signals, set authenticity to
+"likely AI-generated" and score it lower regardless of subreddit tier.
+There is no value in engaging with AI-generated content.
+
+─────────────────────────────────────────────────────────────
 SCORING
 ─────────────────────────────────────────────────────────────
 relevance_score (1–10):
   How relevant is this to Prismatic's product space?
   10 = core embedded iPaaS / integration question
   1  = completely unrelated to integrations
+  Apply subreddit tier and authenticity adjustments here.
 
 engagement_score (1–10):
   How valuable is general community engagement here?
   10 = clear question, active discussion, reply would land well
   1  = no natural opening or nothing useful to add
+  Apply subreddit tier and authenticity adjustments here.
 
   Important nuance on promotional posts: if the post exists purely to
   promote, sell, or advertise — with no genuine question or request for
@@ -110,6 +188,16 @@ combined_score:
 engagement_type:
   "prismatic" if relevance_score >= 6, otherwise "general"
 
+prismatic_relevance:
+  Named tier for how close this post is to Prismatic's core space:
+  "high"   — Prismatic or a direct competitor is named, or the question
+             is explicitly about embedded iPaaS / integration platforms
+  "medium" — Adjacent to Prismatic's space: integration architecture,
+             webhook orchestration, build-vs-buy for integrations,
+             event-driven systems, billing/payment plumbing
+  "low"    — General developer or SaaS discussion; value is reputation
+             and visibility, not product relevance
+
 ─────────────────────────────────────────────────────────────
 RESPONSE — return this JSON and nothing else:
 ─────────────────────────────────────────────────────────────
@@ -118,6 +206,8 @@ RESPONSE — return this JSON and nothing else:
   "engagement_score": <int 1–10>,
   "combined_score": <int — higher of the two>,
   "engagement_type": "general" | "prismatic",
+  "prismatic_relevance": "high" | "medium" | "low",
+  "authenticity": "<1 sentence: 'Appears genuine' or 'Likely AI-generated' or 'Uncertain', followed by the key signal that drove your assessment>",
   "reasoning": "<2–3 sentences covering both scores and why>",
   "prismatic_opportunity": <boolean — true only if pointing to Prismatic or its content is genuinely appropriate, not forced>,
   "low_hanging_fruit": <boolean — true only for Type 2 posts meeting all four criteria above>,

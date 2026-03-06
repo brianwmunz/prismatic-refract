@@ -42,6 +42,8 @@ export interface ScoringResult {
   engagement_score: number;      // General engagement value (1–10)
   combined_score: number;        // Higher of the two — drives Slack priority tier
   engagement_type: "general" | "prismatic";
+  prismatic_relevance: "high" | "medium" | "low"; // Named tier: high=mentioned, medium=adjacent, low=reputation
+  authenticity: string;          // One-sentence assessment: genuine human vs AI-generated content
   reasoning: string;             // 2–3 sentences explaining the scores
   prismatic_opportunity: boolean; // True if pointing to Prismatic/content is natural
   low_hanging_fruit: boolean;    // True if this is a clear question with a clear answer available
