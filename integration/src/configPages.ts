@@ -49,24 +49,6 @@ export const configPages = {
         defaultValue: "5",
       }),
 
-      "Notion Token": configVar({
-        stableKey: "notion-token",
-        dataType: "string",
-        description:
-          "Your Notion integration token (starts with secret_). " +
-          "Create one at notion.so/my-integrations and share your engagement log database with it.",
-        defaultValue: "",
-      }),
-
-      "Notion Database ID": configVar({
-        stableKey: "notion-database-id",
-        dataType: "string",
-        description:
-          "The ID of your Notion engagement log database. " +
-          "Found in the database URL: notion.so/<workspace>/<DATABASE_ID>?v=...",
-        defaultValue: "",
-      }),
-
       "Reddit Username": configVar({
         stableKey: "reddit-username",
         dataType: "string",
