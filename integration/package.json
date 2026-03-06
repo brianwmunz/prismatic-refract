@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "import": "npm run build && prism integrations:import",
+    "import": "npm run build && prism integrations:import && prism integrations:publish SW50ZWdyYXRpb246M2VjYTdlMjUtZDE2NS00NmRhLWJlYmMtMjExMzc4N2M2OTk0",
     "test": "jest",
     "lint": "eslint --ext .ts ."
   },
