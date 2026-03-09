@@ -74,6 +74,59 @@ Prismatic — an embedded iPaaS (integration platform as a service) for
 B2B SaaS companies. Prismatic helps software teams build, deploy, and
 manage the integrations their customers need.
 
+─────────────────────────────────────────────────────────────
+STEP 1 — AUTHENTICITY CHECK (do this before anything else)
+─────────────────────────────────────────────────────────────
+Before scoring for relevance or engagement value, assess whether this
+post is genuine human content worth engaging with. If it isn't, there
+is no point in detailed analysis — score it low and move on.
+
+STRUCTURAL TELLS
+- Overly formatted: numbered lists, bold headers, clean section breaks
+  that no real person writes in a casual Reddit or HN post
+- Opener phrases: "Here's the thing...", "Let me break this down...",
+  "In today's landscape...", "Let's dive in...", "Here's what I learned"
+- Suspiciously comprehensive: covers a topic from every angle evenly,
+  no digressions, no rough edges, unnaturally clean prose
+- No typos, no conversational asides, reads like a final draft
+
+CONTENT TELLS
+- Reads like a blog post or product pitch disguised as a personal story
+  or "look what I built" post — the struggle narrative is too tidy
+- Contains a call-to-action: "feel free to DM me," "check out the repo,"
+  "link in bio," "happy to share more," "drop a comment below"
+- Covers too many topics in one post without going deep on any of them
+- Vague pain points stated as universal truths ("Many founders struggle
+  with...") rather than a specific situation the author actually faced
+- Asks for feedback but the post is already fully polished — nothing
+  is actually unresolved
+
+CONTEXT TELLS
+- Brand new account or suspiciously low karma for the platform
+- Post mentions a product, tool, or repo and the entire narrative
+  exists to funnel attention to it — the "question" is just packaging
+- Posted in a heavily moderated subreddit (r/sysadmin, r/programming,
+  r/ExperiencedDevs) where this type of content routinely gets removed
+
+SCORING IMPACT
+Strong slop (2+ signals from different categories):
+  - Set authenticity to "Likely AI-generated" or "Likely promotional"
+  - Cap engagement_score at 2
+  - Cap relevance_score at 4 — even a post about integration architecture
+    is worth less when it's manufactured content. A messy genuine question
+    about webhooks beats a polished AI post about iPaaS every time.
+  - Skip detailed TYPE 1/TYPE 2 analysis. Score low, note the signals
+    in reasoning, done.
+
+Uncertain (signals from only one category, or ambiguous):
+  - Set authenticity to "Uncertain" with the key signal noted
+  - Apply a 1–2 point penalty to engagement_score
+  - Continue with full analysis below
+
+No significant signals:
+  - Set authenticity to "Appears genuine" and proceed normally
+
+─────────────────────────────────────────────────────────────
 You are looking for TWO types of engagement opportunities:
 
 ─────────────────────────────────────────────────────────────
@@ -129,7 +182,7 @@ should score differently depending on where it appears:
   higher — the practitioner audience means it's more likely to be a
   real person with a real problem.
 - In a LOW-SIGNAL subreddit (especially r/saas), a borderline post
-  scores one point lower unless it clears the AI slop bar below.
+  scores one point lower unless it clears the authenticity check above.
   There is no value in engaging with bots.
 - Posts from subreddits not in any tier above: score normally.
 
@@ -172,33 +225,6 @@ HACKER NEWS (type: post or comment)
 
 OTHER PLATFORMS
   Apply standard scoring. Use the Type field to infer engagement format.
-
-─────────────────────────────────────────────────────────────
-AI SLOP DETECTION
-─────────────────────────────────────────────────────────────
-Before scoring, assess whether the post appears to be AI-generated or
-bot-authored. Signals to look for:
-
-  Structure signals:
-  - Generic numbered lists with bold headers ("Here are 5 reasons…")
-  - "Here's the thing…" / "Let's dive in" / "In today's landscape…"
-  - Posts that read like a blog summary rather than a genuine question
-  - Suspiciously comprehensive answers that cover every angle evenly
-
-  Content signals:
-  - No personal experience, no "I tried X and it failed" markers
-  - Vague pain points stated as universal truths ("Many founders struggle
-    with…") rather than specific situations
-  - Asks for feedback but the post is already fully formed and polished
-  - Promotes a product or service in a way that feels like ad copy
-
-  Author signals:
-  - Username is a jumbled string of words or random alphanumerics
-  - Account is brand-new with no post history
-
-If a post shows multiple of these signals, set authenticity to
-"likely AI-generated" and score it lower regardless of subreddit tier.
-There is no value in engaging with AI-generated content.
 
 ─────────────────────────────────────────────────────────────
 SCORING
