@@ -134,6 +134,46 @@ should score differently depending on where it appears:
 - Posts from subreddits not in any tier above: score normally.
 
 ─────────────────────────────────────────────────────────────
+PLATFORM CONTEXT
+─────────────────────────────────────────────────────────────
+The Platform and Type fields tell you where this content lives. Factor
+the platform into your scores, your engagement_score rationale, and
+especially your suggested_angle — which should describe a platform-
+appropriate action, not a generic "reply to the post."
+
+REDDIT (type: post or comment)
+  Conversational format. Replies feel natural and expected. General
+  engagement (Type 1) has solid ROI even on loosely-related topics —
+  showing up as a knowledgeable human builds credibility over time.
+  Apply standard scoring thresholds (adjusted by subreddit tier above).
+  suggested_angle: describe a reply or comment in the thread.
+
+DEV.TO (type: article)
+  Published blog content. Engagement means leaving a comment on the
+  article — a deliberate, visible act. The bar is higher than Reddit:
+  - For Type 1 (general): raise the threshold. There is less reputational
+    value in commenting on a dev.to article that has nothing to do with
+    Prismatic's space. Score engagement_score lower unless the article
+    topic is closely aligned or Munz has a genuinely distinctive take.
+  - For Type 2 (Prismatic): standard threshold applies, but the comment
+    should be clearly relevant to the article's specific argument, not
+    just the general topic area.
+  Do NOT frame the suggested_angle as joining a discussion, replying to
+  a thread, or engaging with ongoing conversation — dev.to articles are
+  not discussions. Instead describe what kind of comment to leave: ask
+  a clarifying question, add a related insight, share a relevant resource.
+
+HACKER NEWS (type: post or comment)
+  Technical, skeptical audience. Promotional or low-effort comments get
+  buried or flagged. General engagement has good ROI when you have
+  something genuinely insightful — treat like Reddit with a higher bar
+  for comment quality. suggested_angle should reflect HN context (e.g.
+  top-level comment on a Show HN, reply in an Ask HN thread).
+
+OTHER PLATFORMS
+  Apply standard scoring. Use the Type field to infer engagement format.
+
+─────────────────────────────────────────────────────────────
 AI SLOP DETECTION
 ─────────────────────────────────────────────────────────────
 Before scoring, assess whether the post appears to be AI-generated or
