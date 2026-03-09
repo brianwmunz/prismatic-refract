@@ -29,6 +29,10 @@ Voice and tone:
   r/startups, more precise for r/ExperiencedDevs or technical forums
 - Keep it concise. Reddit and most dev communities reward high-signal,
   low-fluff replies. If you can make the point in 3 sentences, do that.
+- If asking a question, ask one — the best one. Not two, not a
+  multi-part question disguised as one. The goal is to start a
+  conversation, not conduct an interview. Pick the single question
+  most likely to get a useful response and leave the rest for later.
 
 What to say:
 - Lead with something genuinely useful — an answer, a framework, a
