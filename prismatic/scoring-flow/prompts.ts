@@ -227,6 +227,52 @@ OTHER PLATFORMS
   Apply standard scoring. Use the Type field to infer engagement format.
 
 ─────────────────────────────────────────────────────────────
+AUDIENCE FIT
+─────────────────────────────────────────────────────────────
+Before finalizing scores, assess whether the poster is in
+Prismatic's ICP: a developer or engineering leader at a B2B
+SaaS company who is building customer-facing integrations at
+scale — integrations their own customers use, embedded in
+their product.
+
+The key question: Is this person building integrations INTO a
+product for that product's customers, or are they looking for
+a tool to automate their own personal/internal workflows?
+
+STRONG fit — The poster is clearly building integrations for
+  their product's customers (embedded iPaaS context, SaaS
+  builder, integration marketplace, customer-facing connectors).
+  Score normally.
+
+ADJACENT fit — The poster works in a platform/product context
+  but isn't explicitly talking about customer-facing integrations.
+  Could be a SaaS builder who just hasn't framed it that way,
+  could be adjacent (internal tooling, data pipelines). Surface
+  only if relevance is medium+ and authenticity is high.
+  Apply a 1-point penalty to engagement_score.
+
+POOR fit — The poster is an end user looking for personal or
+  internal automation tools (Zapier/Make for their own stack,
+  CRM/email automation for their own business, local business
+  lead management, SMB marketing tools). Prismatic cannot help
+  them — they don't build software products.
+  Apply a 2-point penalty to engagement_score.
+  Surface ONLY if all four are true:
+    (a) Clearly a real person (not AI-generated)
+    (b) A genuine unanswered question exists in the thread
+    (c) A helpful non-product reply is possible (pure community value)
+    (d) The platform is a credibility subreddit (HIGH-SIGNAL tier)
+  For poor-fit posts that still surface: set prismatic_opportunity
+  to false regardless of topic relevance, and set low_hanging_fruit
+  to false.
+
+Set audience_fit_reason to one sentence explaining the signal
+that drove your assessment. Examples:
+  "Poster is evaluating embedded iPaaS options for their SaaS product."
+  "Context suggests internal tooling, not customer-facing integrations."
+  "Poster is automating their own CRM and email workflows — end user."
+
+─────────────────────────────────────────────────────────────
 SCORING
 ─────────────────────────────────────────────────────────────
 relevance_score (1–10):
@@ -274,6 +320,8 @@ RESPONSE — return this JSON and nothing else:
   "engagement_type": "general" | "prismatic",
   "prismatic_relevance": "high" | "medium" | "low",
   "authenticity": "<1 sentence: 'Appears genuine' or 'Likely AI-generated' or 'Uncertain', followed by the key signal that drove your assessment>",
+  "audience_fit": "strong" | "adjacent" | "poor",
+  "audience_fit_reason": "<1 sentence explaining what signal drove the audience_fit assessment>",
   "reasoning": "<2–3 sentences covering both scores and why>",
   "prismatic_opportunity": <boolean — true only if pointing to Prismatic or its content is genuinely appropriate, not forced>,
   "low_hanging_fruit": <boolean — true only for Type 2 posts meeting all four criteria above>,

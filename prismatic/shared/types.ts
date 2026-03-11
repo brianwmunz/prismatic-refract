@@ -44,6 +44,8 @@ export interface ScoringResult {
   engagement_type: "general" | "prismatic";
   prismatic_relevance: "high" | "medium" | "low"; // Named tier: high=mentioned, medium=adjacent, low=reputation
   authenticity: string;          // One-sentence assessment: genuine human vs AI-generated content
+  audience_fit: "strong" | "adjacent" | "poor"; // ICP fit: building integrations for customers vs. general dev vs. end user
+  audience_fit_reason: string;   // One sentence explaining the audience_fit assessment
   reasoning: string;             // 2–3 sentences explaining the scores
   prismatic_opportunity: boolean; // True if pointing to Prismatic/content is natural
   low_hanging_fruit: boolean;    // True if this is a clear question with a clear answer available

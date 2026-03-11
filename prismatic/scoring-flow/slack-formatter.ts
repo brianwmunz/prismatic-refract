@@ -68,6 +68,8 @@ export interface RefractMetadata {
   engagement_type: "general" | "prismatic";
   prismatic_relevance: "high" | "medium" | "low";
   authenticity: string;
+  audience_fit: "strong" | "adjacent" | "poor";
+  audience_fit_reason: string;
   reasoning: string;
   prismatic_opportunity: boolean;
   low_hanging_fruit: boolean;
@@ -151,8 +153,9 @@ function buildFullBlocks(scored: ScoredMention, indicator: string): SlackBlock[]
         type: "mrkdwn",
         text: [
           `📊 Relevance: ${scoring.relevance_score} | Engagement: ${scoring.engagement_score}`,
-          typeBadge(scoring.engagement_type, scoring.prismatic_relevance, scoring.low_hanging_fruit, scoring.prismatic_opportunity),
+          typeBadge(scoring.engagement_type, scoring.prismatic_relevance, scoring.low_hanging_fruit, scoring.prismatic_opportunity, scoring.audience_fit),
           `🔍 *Authenticity:* ${scoring.authenticity}`,
+          `👤 *Audience:* ${audienceFitLabel(scoring.audience_fit)} — ${scoring.audience_fit_reason}`,
           `🧠 *Reasoning:* ${scoring.reasoning}`,
           `💡 *Angle:* ${scoring.suggested_angle}`,
         ].join("\n"),
@@ -228,6 +231,8 @@ function buildMetadataBlock(scored: ScoredMention): SlackBlock {
     engagement_type:       scoring.engagement_type,
     prismatic_relevance:   scoring.prismatic_relevance,
     authenticity:          scoring.authenticity,
+    audience_fit:          scoring.audience_fit,
+    audience_fit_reason:   scoring.audience_fit_reason,
     reasoning:             scoring.reasoning,
     prismatic_opportunity: scoring.prismatic_opportunity,
     low_hanging_fruit:     scoring.low_hanging_fruit,
@@ -265,7 +270,8 @@ function typeBadge(
   type: "general" | "prismatic",
   prismaticRelevance: "high" | "medium" | "low",
   lowHangingFruit: boolean,
-  prismaticOpportunity: boolean
+  prismaticOpportunity: boolean,
+  audienceFit: "strong" | "adjacent" | "poor"
 ): string {
   const parts: string[] = [];
 
@@ -282,7 +288,22 @@ function typeBadge(
     parts.push("💬 *General Engagement*");
   }
 
+  if (audienceFit === "poor") {
+    parts.push("⚠️ *Reputation only — no product mention*");
+  }
+
   return parts.join("  ");
+}
+
+/**
+ * Human-readable label for the audience fit tier shown in the Slack message.
+ */
+function audienceFitLabel(fit: "strong" | "adjacent" | "poor"): string {
+  return {
+    strong:   "✅ Strong ICP fit",
+    adjacent: "〰️ Adjacent",
+    poor:     "⚠️ Poor fit (end user)",
+  }[fit];
 }
 
 /**

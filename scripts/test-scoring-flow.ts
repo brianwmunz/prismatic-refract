@@ -167,6 +167,8 @@ async function main() {
         engagement_type:      "prismatic" as const,
         prismatic_relevance:  "medium" as const,
         authenticity:         "Appears genuine: specific question with personal context.",
+        audience_fit:         "strong" as const,
+        audience_fit_reason:  "Poster is evaluating embedded iPaaS options for their SaaS product.",
         reasoning:            "Mock reasoning — set ANTHROPIC_API_KEY for real scoring.",
         prismatic_opportunity: true,
         low_hanging_fruit:    true,
