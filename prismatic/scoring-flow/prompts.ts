@@ -111,16 +111,31 @@ CONTEXT TELLS
 SCORING IMPACT
 Strong slop (2+ signals from different categories):
   - Set authenticity to "Likely AI-generated" or "Likely promotional"
-  - Cap engagement_score at 2
-  - Cap relevance_score at 4 — even a post about integration architecture
-    is worth less when it's manufactured content. A messy genuine question
-    about webhooks beats a polished AI post about iPaaS every time.
+  - Cap engagement_score at 1
+  - Cap relevance_score at 2
+  - This produces a combined_score of 2, well below any surfacing threshold.
+    The post will be filtered out silently. Do not spend effort on it.
   - Skip detailed TYPE 1/TYPE 2 analysis. Score low, note the signals
     in reasoning, done.
 
+  EXCEPTION — Prismatic or competitor explicitly named:
+    If the post explicitly names Prismatic, or a direct competitor
+    (Paragon, Workato Embedded, Tray.io Embedded, Merge.dev, Apideck,
+    Pandium), override the slop caps and score relevance normally (up
+    to 10). Competitive intelligence has value even in manufactured
+    content. Set engagement_score to 2 max (we still won't reply, but
+    the post surfaces for monitoring). Note the exception in reasoning.
+
+  EXCEPTION — High organic engagement visible in the text:
+    If the post text itself shows clear evidence of high engagement
+    (many replies quoted, commenter references multiple responses, etc.)
+    and the topic is directly relevant to Prismatic's space, you may
+    raise relevance by up to 2 points above the cap. Still cap
+    engagement_score at 2. Note the exception in reasoning.
+
 Uncertain (signals from only one category, or ambiguous):
   - Set authenticity to "Uncertain" with the key signal noted
-  - Apply a 1–2 point penalty to engagement_score
+  - Apply a 2-point penalty to engagement_score
   - Continue with full analysis below
 
 No significant signals:
