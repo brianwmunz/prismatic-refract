@@ -121,10 +121,11 @@ Strong slop (2+ signals from different categories):
   EXCEPTION — Prismatic or competitor explicitly named:
     If the post explicitly names Prismatic, or a direct competitor
     (Paragon, Workato Embedded, Tray.io Embedded, Merge.dev, Apideck,
-    Pandium), override the slop caps and score relevance normally (up
-    to 10). Competitive intelligence has value even in manufactured
-    content. Set engagement_score to 2 max (we still won't reply, but
-    the post surfaces for monitoring). Note the exception in reasoning.
+    Pandium), override the slop caps entirely and score both relevance
+    and engagement normally. Even if the OP is AI-generated or
+    promotional, the people showing up to engage with it are real —
+    that's the audience worth replying to. Note the exception in
+    reasoning.
 
   EXCEPTION — High organic engagement visible in the text:
     If the post text itself shows clear evidence of high engagement
