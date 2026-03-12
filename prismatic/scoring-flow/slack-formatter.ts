@@ -28,7 +28,7 @@ import type { ScoredMention } from "../shared/types.js";
 
 const HIGH_SCORE_THRESHOLD = 7;
 const LOW_SCORE_THRESHOLD = 3;
-const SNIPPET_MAX_LENGTH = 150;
+const SNIPPET_MAX_LENGTH = 1000;
 
 // ---------------------------------------------------------------------------
 // Types
