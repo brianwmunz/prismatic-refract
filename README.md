@@ -8,7 +8,7 @@ Refract monitors developer communities (Reddit, HN, dev.to, etc.) via [Syften](h
 
 ## How it works
 
-Refract runs two Prismatic flows:
+Refract runs three Prismatic flows:
 
 ```
 Syften (webhook)
@@ -20,7 +20,12 @@ Flow 1 — Scoring
     │   You react with 👀 on a post worth replying to
     ▼
 Flow 2 — Drafting
-       Fetch full post from Reddit → Draft reply with Claude → Post to Slack thread
+    │  Fetch full post from Reddit → Draft reply with Claude → Post to Slack thread
+    │
+    │   You react with ✅ after posting your reply
+    ▼
+Flow 3 — Logging
+       Log the engagement to Notion → Post confirmation in Slack thread
 ```
 
 ### Two engagement types
@@ -40,7 +45,9 @@ Every mention gets two scores (1–10):
 - **Relevance** — how close is this to Prismatic's product space?
 - **Engagement** — how much value would a thoughtful reply add?
 
-The `combined_score` is the higher of the two. Mentions scoring below the threshold (default: **5**) are dropped silently and never reach Slack.
+The `combined_score` is the higher of the two and drives the Slack priority tier. Mentions are filtered out before reaching Slack if **either** of these is true:
+- `combined_score` is below the threshold (default: **5**)
+- `engagement_score` is below **3** — posts with no natural reply opening are caught here rather than surfaced and then skipped by the drafting agent
 
 ---
 
@@ -51,27 +58,30 @@ prismatic-refract/
 │
 ├── prismatic/
 │   ├── scoring-flow/
-│   │   ├── index.ts          # Flow 1 orchestrator
-│   │   ├── parse-syften.ts   # Validates and parses Syften webhook payload
-│   │   ├── prompts.ts        # Scoring system prompt + user message builder
-│   │   ├── claude-scorer.ts  # Calls Claude, returns ScoredMention
+│   │   ├── index.ts           # Flow 1 orchestrator
+│   │   ├── parse-syften.ts    # Validates and parses Syften webhook payload
+│   │   ├── prompts.ts         # Scoring system prompt + user message builder
+│   │   ├── claude-scorer.ts   # Calls Claude, returns ScoredMention
 │   │   └── slack-formatter.ts # Builds Slack Block Kit messages
 │   │
 │   ├── drafting-flow/
-│   │   ├── index.ts          # Flow 2 orchestrator (triggered by 👀 reaction)
-│   │   ├── fetch-post.ts     # Fetches full post content from Reddit JSON API
-│   │   ├── prompts.ts        # Drafting system prompt + user message builder
-│   │   └── claude-drafter.ts # Calls Claude, parses DRAFT / NOTES response
+│   │   ├── index.ts           # Flow 2 orchestrator (triggered by 👀 reaction)
+│   │   ├── fetch-post.ts      # Fetches full post content from Reddit JSON API
+│   │   ├── prompts.ts         # Drafting system prompt + user message builder
+│   │   └── claude-drafter.ts  # Calls Claude, parses DRAFT / NOTES response
+│   │
+│   ├── logging-flow/
+│   │   └── index.ts           # Flow 3 orchestrator (triggered by ✅ reaction)
 │   │
 │   └── shared/
-│       ├── types.ts          # All TypeScript interfaces
-│       ├── claude-client.ts  # Anthropic API wrapper
-│       └── slack-client.ts   # Slack Web API wrapper
+│       ├── types.ts           # All TypeScript interfaces
+│       ├── claude-client.ts   # Anthropic API wrapper
+│       ├── slack-client.ts    # Slack Web API wrapper
+│       └── notion-client.ts   # Notion API wrapper
 │
 ├── scripts/
-│   └── test-scoring-flow.ts  # End-to-end test for Flow 1 (no Slack required)
+│   └── test-scoring-flow.ts   # End-to-end test for Flow 1 (no Slack required)
 │
-├── devrel-engagement-plan.md # Full project plan and architecture notes
 ├── package.json
 └── tsconfig.json
 ```
@@ -135,9 +145,23 @@ Both flows are configured via environment variables locally and Prismatic config
 
 | Variable | Used in | Description |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Both flows | Anthropic API key (`sk-ant-...`) |
-| `SLACK_BOT_TOKEN` | Both flows | Slack bot OAuth token (`xoxb-...`) |
-| `SLACK_CHANNEL` | Both flows | Channel ID for `#community-engagement` |
+| `ANTHROPIC_API_KEY` | Flows 1 & 2 | Anthropic API key (`sk-ant-...`) |
+| `SLACK_BOT_TOKEN` | All flows | Slack bot OAuth token (`xoxb-...`) |
+| `SLACK_CHANNEL` | All flows | Channel ID for `#community-engagement` |
+| `NOTION_TOKEN` | Flow 3 | Notion integration token (`secret_...`) |
+| `NOTION_DATABASE_ID` | Flow 3 | ID of the Notion engagement log database |
+
+### Required Slack OAuth scopes
+
+The bot token needs these scopes in your Slack app:
+
+| Scope | Used for |
+|---|---|
+| `chat:write` | Posting scored mentions and draft replies |
+| `reactions:read` | Receiving 👀 and ✅ reaction events |
+| `channels:history` | Fetching original messages in Flow 2 and Flow 3 |
+| `metadata.message:write` | Storing scoring metadata invisibly on messages (no visible JSON) |
+| `metadata.message:read` | Reading that metadata when a reaction fires |
 
 ### Tuning the score threshold
 
@@ -169,7 +193,7 @@ After a week of real data, review which scores felt accurate and adjust the rubr
 
 ## Prismatic setup
 
-See [devrel-engagement-plan.md](./devrel-engagement-plan.md) for the full architecture. High-level steps:
+High-level steps:
 
 1. **Install the `prism` CLI** and authenticate with your Prismatic account
 2. **Wrap the flows** with Prismatic's `@prismatic-io/spectral` SDK to define triggers, steps, and config variables
@@ -605,33 +629,36 @@ The flow is now live. Adding a 👀 reaction to any scored message in `#communit
 
 ---
 
-### Slack metadata gotcha: use `plain_text`, not `mrkdwn`
+### Cross-flow metadata: Slack message metadata API
 
-One non-obvious issue you'll encounter when storing structured data in Slack messages: **Slack's `mrkdwn` renderer auto-links bare URLs** by wrapping them in `<>` angle brackets.
+Flows 2 and 3 need context from Flow 1 (post URL, scores, reasoning) when a reaction fires. This context is stored using [Slack's message metadata API](https://api.slack.com/metadata/using) — a non-rendered field attached to each message that is invisible to users but accessible to the bot.
 
-If you store JSON in a `mrkdwn` context block element:
-```json
-{"post_url": "https://reddit.com/r/saas/comments/..."}
-```
-
-Slack rewrites it to:
-```json
-{"post_url": "<https://reddit.com/r/saas/comments/...>"}
-```
-
-When Flow 2 reads this back and calls `JSON.parse()`, the value is no longer a valid URL — `new URL("<https://...>")` throws.
-
-**Fix:** Use `"type": "plain_text"` for any context block element that contains raw data. Slack passes `plain_text` content through verbatim without processing it.
-
+**Posting** (Flow 1 — `chat.postMessage`):
 ```typescript
-// ❌ Slack auto-links URLs inside mrkdwn, corrupting JSON
-{ type: "mrkdwn", text: JSON.stringify(metadata) }
-
-// ✅ plain_text is passed through verbatim
-{ type: "plain_text", text: JSON.stringify(metadata) }
+await postMessage(token, {
+  channel,
+  text,
+  blocks,
+  metadata: {
+    event_type: "refract_scored_mention",
+    event_payload: { post_url, scores, reasoning, ... },
+  },
+});
 ```
 
-This applies any time you're embedding machine-readable data (JSON, URLs, IDs) in a Slack message that another system will read back later.
+**Reading** (Flows 2 & 3 — `conversations.history`):
+```typescript
+const response = await conversationsHistory({
+  channel, ts, inclusive: true, include_all_metadata: true,
+});
+const metadata = response.messages[0].metadata?.event_payload;
+```
+
+Requires OAuth scopes `metadata.message:write` and `metadata.message:read` on the Slack bot.
+
+> **Earlier approach:** The original implementation stored metadata as JSON in a `context` block (`block_id: "refract_metadata"`). This worked but rendered a visible JSON blob at the bottom of every Slack card. If you're on older messages that predate this change, the fallback in `drafting-flow/index.ts` still parses those blocks.
+>
+> **`plain_text` vs `mrkdwn` gotcha (for the context block approach):** Slack's `mrkdwn` renderer auto-links bare URLs by wrapping them in `<>` — which corrupts JSON. If you ever store raw data in a context block, always use `"type": "plain_text"` to prevent this.
 
 ---
 
@@ -642,16 +669,18 @@ This applies any time you're embedding machine-readable data (JSON, URLs, IDs) i
 | Business logic in `prismatic/`, Prismatic wrapper in `integration/` | The business logic is framework-agnostic and testable with `tsx` before touching Prismatic |
 | Prompts in standalone `prompts.ts` files | Tune Claude's instructions without touching any flow logic |
 | `Promise.allSettled` for batch scoring | One bad Claude API call doesn't block the rest of the batch |
-| `block_id: "refract_metadata"` on every scored message | Flow 2 finds the metadata by ID, not position — robust to block order changes |
+| Slack message metadata API for cross-flow context | Stores post URL, scores, and reasoning invisibly on each scored message — no JSON blob visible in the channel. Flows 2 and 3 read it via `message.metadata.event_payload` when a reaction fires |
+| Engagement score floor (≥ 3) alongside combined_score filter | Prevents high-relevance/no-opening posts from surfacing and then being skipped by the drafting agent |
 | Plain text `DRAFT: / --- / NOTES:` format for drafting | JSON-encoding long free-form text (with quotes, newlines, markdown) is unreliable; a fixed string delimiter is simpler |
 | Score threshold filter before Slack posting | Keeps `#community-engagement` signal-to-noise high; low-value mentions never reach the channel |
 | Sequential Slack posting (`for...of` not `Promise.all`) | Prevents channel flooding if Syften delivers a burst of mentions at once |
+| `header` block at the top of each scored message | Renders with a background stripe in Slack, providing a strong visual break when scrolling through multiple posts |
 
 ---
 
 ## Future enhancements
 
-See the Future Enhancements section in [devrel-engagement-plan.md](./devrel-engagement-plan.md) for the full list, including:
+Potential future enhancements include:
 
 - **`/refract-digest` slash command** — on-demand summary of the last 24 hours with AI-ranked recommendations
 - **Engagement tracking** — log which posts you replied to and how they performed
